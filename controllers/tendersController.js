@@ -5,7 +5,7 @@ const tendersController = {};
 tendersController.getTopTenders = async (req, res) => {
     try {
         const result = await db.query('SELECT * FROM tender ORDER BY price DESC LIMIT 10');
-        res.json(result.rows);
+        res.json({tenders:result.rows, tenders_len: result.rows.length});
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -17,44 +17,36 @@ tendersController.filterTenders = async (req, res) => {
     const params = [];
     let query = 'SELECT * FROM tender WHERE 1=1';
     if (keyWords) {
-        query += ' AND name LIKE $1';
+        query += ` AND name LIKE $1`;
         params.push(`%${keyWords}%`);
     }
-    if (applicationsEnd) {
-        query += ' AND deadline <= $2';
-        params.push(applicationsEnd);
-    }
-    if (applicationsStart) {
-        query += ' AND deadline >= $2';
-        params.push(applicationsStart);
-    }
     if (startPrice) {
-        query += ' AND price >= $3';
+        query += ` AND price::numeric >= CAST($${params.length+1} AS numeric)`;
         params.push(startPrice);
     }
     if (endPrice) {
-        query += ' AND price <= $3';
+        query += ` AND price::numeric <= CAST($${params.length+1} AS numeric)`;
         params.push(endPrice);
     }
     if (repeats) {
-        query += ' AND repeatcondition = $3';
+        query += ` AND repeatcondition::text = $${params.length+1}`;
         params.push(repeats);
     }
     if (priority) {
-        query += ' AND priority <> $3';
+        query += ` AND priority::text <> $${params.length+1}`;
         params.push(priority);
     }
     if (methodBuy) {
-        query += ' AND method_buy = $3';
+        query += ` AND method_buy::text = $${params.length+1}`;
         params.push(methodBuy);
     }
     if (conditionPayment) {
-        query += ' AND condition_payment = $3';
+        query += ` AND condition_payment::text = $${params.length+1}`;
         params.push(conditionPayment);
     }
     try {
         const result = await db.query(query, params);
-        res.json(result.rows);
+        res.json({tenders:result.rows, tenders_len: result.rows.length});
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
