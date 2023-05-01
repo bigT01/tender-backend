@@ -137,7 +137,7 @@ usersController.updateSearchInformation = async (req, res) => {
 
         await db.query(query, values);
 
-        res.status(200).json({ message: 'Search information saved successfully.' });
+        res.status(200).json({ message: 'Search information update successfully.' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'An error occurred while saving search information.' });

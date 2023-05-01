@@ -41,6 +41,43 @@ tendersController.getTopTenders = async (req, res) => {
     }
 };
 
+tendersController.TodayTenders = async (req, res) => {
+    try {
+        // Get today's date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set the time to 00:00:00
+
+        // Execute the SQL query to fetch tender information created today
+        const query = `
+      SELECT *
+      FROM tender
+      WHERE created_at >= $1
+    `;
+        const values = [today];
+
+        const result = await db.query(query, values);
+
+        const tenders = result.rows.map(tender => {
+            const date = new Date(tender.created_at);
+            const year = date.getUTCFullYear();
+            const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+            const day = date.getUTCDate().toString().padStart(2, '0');
+            const hours = date.getUTCHours().toString().padStart(2, '0');
+            const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+
+            const formattedDate = `${year}${month}${day}${hours}${minutes}${seconds}`;
+
+            return { ...tender, formattedDate };
+        });
+
+        res.status(200).json({tenders, tenders_len: result.rows.length});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching tender information.' });
+    }
+};
+
 tendersController.filterTenders = async (req, res) => {
     const { keyWords, startPrice, endPrice, repeats, applicationsStart, applicationsEnd, priority, methodBuy, conditionPayment} = req.body;
     const params = [];
