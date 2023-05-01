@@ -97,6 +97,53 @@ usersController.saveSearchInformation = async (req, res) => {
     }
 }
 
+usersController.updateSearchInformation = async (req, res) => {
+    try {
+        const { userId, keyWords, deadline, price, repeats, priority, methodBuy, conditionPayment } = req.body;
+        // Check for null or undefined values and assign default values if necessary
+        const searchInfo = {
+            userId: userId || null,
+            name: keyWords || null,
+            deadline: deadline || null,
+            price: price || null,
+            repeatCondition: repeats || null,
+            priority: priority || null,
+            method_buy: methodBuy || null,
+            condition_payment: conditionPayment || null
+        };
+
+        // Execute the SQL query to insert the search information into the searchInfo table
+        const query = `
+            UPDATE searchInfo
+            SET name = $2,
+                deadline = $3,
+                price = $4,
+                repeatCondition = $5,
+                priority = $6,
+                method_buy = $7,
+                condition_payment = $8
+            WHERE userId = $1;
+    `;
+        const values = [
+            searchInfo.userId,
+            searchInfo.name,
+            searchInfo.deadline,
+            searchInfo.price,
+            searchInfo.repeatCondition,
+            searchInfo.priority,
+            searchInfo.method_buy,
+            searchInfo.condition_payment
+        ];
+
+        await db.query(query, values);
+
+        res.status(200).json({ message: 'Search information saved successfully.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while saving search information.' });
+    }
+}
+
 usersController.showSearchInformation = async (req, res) => {
     try{
         const { userId } = req.params;

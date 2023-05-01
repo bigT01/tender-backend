@@ -14,7 +14,9 @@ app.use(cors());
 app.post('/login', usersController.login);
 app.post('/signup', usersController.signUp);
 app.post('/search/save', usersController.saveSearchInformation);
+app.put('/search/update', usersController.showSearchInformation);
 app.get('/search/:userId', usersController.showSearchInformation);
+
 
 app.get('/toptenders', tendersController.getTopTenders);
 app.post('/tenders/filter', tendersController.filterTenders);
